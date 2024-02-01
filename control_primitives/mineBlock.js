@@ -17,12 +17,6 @@ async function mineBlock(bot, name, count = 1) {
     });
     if (blocks.length === 0) {
         bot.chat(`No ${name} nearby, please explore first`);
-        _mineBlockFailCount++;
-        if (_mineBlockFailCount > 10) {
-            throw new Error(
-                "mineBlock failed too many times, make sure you explore before calling mineBlock"
-            );
-        }
         return;
     }
     console.log(blocks.length)
@@ -33,6 +27,7 @@ async function mineBlock(bot, name, count = 1) {
     await bot.collectBlock.collect(targets, {
         ignoreNoPath: true,
         count: count,
+        timeout: 5000000
     });
 }
 

@@ -1,6 +1,6 @@
 Vec3 = require('vec3').Vec3;
 
-async function placeItemAnywhere(bot, name, originalPos, maxAttempts = 8) {
+async function placeItem(bot, name, originalPos, maxAttempts = 8) {
 
     let position = new Vec3(originalPos.x, originalPos.y, originalPos.z);
 
@@ -70,4 +70,4 @@ async function placeItemAnywhere(bot, name, originalPos, maxAttempts = 8) {
     }
 }
 
-module.exports = { placeItemAnywhere }
+module.exports = { placeItem }

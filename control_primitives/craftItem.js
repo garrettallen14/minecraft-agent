@@ -19,7 +19,7 @@ async function craftItem(bot, name, count = 1) {
         bot.chat("Craft without a crafting table");
     } else {
         await bot.pathfinder.goto(
-            new GoalLookAtBlock(craftingTable.position, bot.world), timeout=100000
+            new pathfinder.goals.GoalGetToBlock(craftingTable.position.x, craftingTable.position.y, craftingTable.position.z), timeout=1000000
         );
     }
     const recipe = bot.recipesFor(itemByName.id, null, 1, craftingTable)[0];
