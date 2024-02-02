@@ -57,9 +57,9 @@ async function exploreUntil(
             const z =
                 bot.entity.position.z +
                 Math.floor(Math.random() * 20 + 10) * dz;
-            let goal = new GoalNear(x, y, z);
+            let goal = new pathfinder.goals.GoalNear(x, y, z);
             if (dy === 0) {
-                goal = new GoalNearXZ(x, z);
+                goal = new pathfinder.goals.GoalNearXZ(x, z);
             }
             bot.pathfinder.setGoal(goal);
 
@@ -85,3 +85,5 @@ async function exploreUntil(
         }, maxTime * 1000);
     });
 }
+
+module.exports = { exploreUntil };

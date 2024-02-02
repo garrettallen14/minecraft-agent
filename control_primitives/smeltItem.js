@@ -23,7 +23,7 @@ async function smeltItem(bot, itemName, fuelName, count = 1) {
         throw new Error("No furnace nearby");
     } else {
         await bot.pathfinder.goto(
-            new GoalLookAtBlock(furnaceBlock.position, bot.world)
+            new pathfinder.goals.GoalLookAtBlock(furnaceBlock.position, bot.world)
         );
     }
     const furnace = await bot.openFurnace(furnaceBlock);
@@ -58,11 +58,7 @@ async function smeltItem(bot, itemName, fuelName, count = 1) {
         bot.chat(
             `Failed to smelt ${itemName}, please check the fuel and input.`
         );
-        _smeltItemFailCount++;
-        if (_smeltItemFailCount > 10) {
-            throw new Error(
-                `smeltItem failed too many times, please check the fuel and input.`
-            );
-        }
     }
 }
+
+module.exports = { smeltItem };

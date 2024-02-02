@@ -32,3 +32,5 @@ async function shoot(bot, weapon, target) {
     bot.on('auto_shot_stopped', (target) => {
     })
 }
+
+module.exports = { shoot };

@@ -1,0 +1,16 @@
+# bot.removeAllListeners('chat')
+# @On(bot, 'chat')
+# def handleMsg(this, sender, message, *args):
+#     if sender and (sender != bot.username):
+#         bot.chat('Hi, you said ' + message)
+#         if 'come' in message:
+#             player = bot.players[sender]
+#             target = player.entity
+#         if not target:
+#             bot.chat("I don't see you !")
+#             return
+#         pos = target.position
+#         bot.pathfinder.setMovements(movements)
+#         bot.pathfinder.setGoal(pathfinder.goals.GoalNear(pos.x, pos.y, pos.z, RANGE_GOAL))
+#         if 'stop' in message:
+#             off(bot, 'chat', handleMsg)
