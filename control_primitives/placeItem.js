@@ -1,71 +1,78 @@
 Vec3 = require('vec3').Vec3;
 
-async function placeItem(bot, name, originalPos, maxAttempts = 8) {
+async function placeItem(bot, name, target) {
 
-    let position = new Vec3(originalPos.x, originalPos.y, originalPos.z);
-
-    // const mineblock = require('./mineBlock.js');
-
+    position = new Vec3(target.position.x, target.position.y, target.position.z);
+    
+    // return if name is not string
     if (typeof name !== "string") {
         throw new Error(`name for placeItem must be a string`);
     }
+    // return if position is not Vec3
     if (!(position instanceof Vec3)) {
         throw new Error(`position for placeItem must be a Vec3`);
     }
-
-    const itemByName = globalThis.mcData.itemsByName[name];
+    const itemByName = mcData.itemsByName[name];
     if (!itemByName) {
         throw new Error(`No item named ${name}`);
     }
+    const item = bot.inventory.findInventoryItem(itemByName.id);
+    if (!item) {
+        bot.chat(`No ${name} in inventory`);
+        return;
+    }
+    const item_count = item.count;
+    // find a reference block
+    const faceVectors = [
+        new Vec3(0, 1, 0),
+        new Vec3(0, -1, 0),
+        new Vec3(1, 0, 0),
+        new Vec3(-1, 0, 0),
+        new Vec3(0, 0, 1),
+        new Vec3(0, 0, -1),
+    ];
+    let referenceBlock = null;
+    let faceVector = null;
+    for (const vector of faceVectors) {
+        const block = bot.blockAt(position.minus(vector));
+        if (block?.name !== "air") {
+            referenceBlock = block;
+            faceVector = vector;
+            bot.chat(`Placing ${name} on ${block.name} at ${block.position}`);
+            break;
+        }
+    }
+    if (!referenceBlock) {
+        bot.chat(
+            `No block to place ${name} on. You cannot place a floating block.`
+        );
+        // _placeItemFailCount++;
+        // if (_placeItemFailCount > 10) {
+        //     throw new Error(
+        //         `placeItem failed too many times. You cannot place a floating block.`
+        //     );
+        // }
+        return;
+    }
 
-    let attempts = 0;
-    while (attempts < maxAttempts) {
-        try {
-            const item = bot.inventory.findInventoryItem(itemByName.id);
-            if (!item) {
-                bot.chat(`No ${name} in inventory`);
-                return;
-            }
-
-            // Adjust the position slightly for each attempt
-            const offset = attempts === 0 ? new Vec3(0, 0, 0) : new Vec3(Math.floor(Math.random() * 3) - 1, 0, Math.floor(Math.random() * 3) - 1);
-            const tryPosition = position.add(offset);
-
-            const faceVectors = [
-                new Vec3(0, 1, 0),
-                new Vec3(0, -1, 0),
-                new Vec3(1, 0, 0),
-                new Vec3(-1, 0, 0),
-                new Vec3(0, 0, 1),
-                new Vec3(0, 0, -1),
-            ];
-
-            let referenceBlock = null;
-            let faceVector = null;
-            for (const vector of faceVectors) {
-                const block = bot.blockAt(tryPosition.minus(vector));
-                if (block?.name !== "air") {
-                    referenceBlock = block;
-                    faceVector = vector;
-                    break;
-                }
-            }
-
-            if (!referenceBlock) {
-                throw new Error(`No block to place ${name} on. You cannot place a floating block.`);
-            }
-
-            await bot.pathfinder.setGoal(new pathfinder.goals.GoalGetToBlock(new Vec3(referenceBlock.position.x, referenceBlock.position.y, referenceBlock.position.z), bot.world, {'range': 2}));
-            await bot.equip(item, "hand");
-            await bot.placeBlock(referenceBlock, faceVector);
-            bot.chat(`Placed ${name} at ${tryPosition}`);
-            return true; // Exit the function after successful placement
-        } catch (err) {
-            attempts++;
-            if (attempts >= maxAttempts) {
-                bot.chat(`Error placing ${name}: ${err.message}. Maximum attempts reached. It seems no blocks are open around me.`);
-                return false;
-            }
+    // You must use try catch to placeBlock
+    try {
+        // You must first go to the block position you want to place
+        await bot.pathfinder.goto(new pathfinder.goals.GoalPlaceBlock(position, bot.world, {}));
+        // You must equip the item right before calling placeBlock
+        bot.setControlState('sneak', true) // Sneak to place block
+        await bot.equip(item, "hand");
+        await bot.placeBlock(referenceBlock, faceVector);
+        bot.setControlState('sneak', false) // UnSneak
+        bot.chat(`Placed ${name}`);
+    } catch (err) {
+        const item = bot.inventory.findInventoryItem(itemByName.id);
+        if (item?.count === item_count) {
+            bot.chat(
+                `Error placing ${name}: ${err.message}, please find another position to place`
+            );
+        } else {
+            bot.chat(`Placed ${name}`);
         }
     }
 }

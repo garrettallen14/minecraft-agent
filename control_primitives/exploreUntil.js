@@ -83,6 +83,8 @@ async function exploreUntil(
             bot.chat("Max exploration time reached");
             resolve(null);
         }, maxTime * 1000);
+        
+        return true;
     });
 }
 

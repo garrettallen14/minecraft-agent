@@ -7,6 +7,7 @@ async function mineBlockPosition(bot, position) {
         ignoreNoPath: true,
         timeout: 5000000
     });
+    return true;
 }
 
 module.exports = { mineBlockPosition };

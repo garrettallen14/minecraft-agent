@@ -1,16 +1,7 @@
-# bot.removeAllListeners('chat')
-# @On(bot, 'chat')
-# def handleMsg(this, sender, message, *args):
-#     if sender and (sender != bot.username):
-#         bot.chat('Hi, you said ' + message)
-#         if 'come' in message:
-#             player = bot.players[sender]
-#             target = player.entity
-#         if not target:
-#             bot.chat("I don't see you !")
-#             return
-#         pos = target.position
-#         bot.pathfinder.setMovements(movements)
-#         bot.pathfinder.setGoal(pathfinder.goals.GoalNear(pos.x, pos.y, pos.z, RANGE_GOAL))
-#         if 'stop' in message:
-#             off(bot, 'chat', handleMsg)
+Next Steps:
+
+1. Get GPT working nicely, formatting responses in JSON in a familiar way
+    - Really dial this one in
+    - Separate out subgoals
+2. Get the action, prediction, outcome loop going for each subgoal
+3. Instill each portion with memory of its own

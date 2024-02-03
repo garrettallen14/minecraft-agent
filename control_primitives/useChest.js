@@ -5,7 +5,6 @@ async function getItemFromChest(bot, chestPos, itemsToGet, count) {
     // return if chestPosition is not Vec3
     if (!(chestPosition instanceof Vec3)) {
         bot.chat("chestPosition for getItemFromChest must be a Vec3");
-        return;
     }
     await moveToChest(bot, chestPosition);
     const chestBlock = bot.blockAt(chestPosition);
@@ -62,6 +61,7 @@ async function depositItemIntoChest(bot, chestPos, itemsToDeposit, count) {
         }
     }
     await closeChest(bot, chestBlock);
+    return true;
 }
 
 // async function checkItemInsideChest(bot, chestPos) {

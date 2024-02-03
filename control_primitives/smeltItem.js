@@ -58,7 +58,9 @@ async function smeltItem(bot, itemName, fuelName, count = 1) {
         bot.chat(
             `Failed to smelt ${itemName}, please check the fuel and input.`
         );
+        return false;
     }
+    return true;
 }
 
 module.exports = { smeltItem };

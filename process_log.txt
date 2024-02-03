@@ -1,0 +1,20 @@
+2024-02-02 19:26:24,302:INFO:Bot is starting up...
+2024-02-02 19:27:24,896:INFO:Bot is starting up...
+2024-02-02 19:27:35,430:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-02-02 19:27:51,631:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-02-02 19:28:05,110:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-02-02 19:28:25,501:INFO:HTTP Request: POST https://api.openai.com/v1/chat/completions "HTTP/1.1 200 OK"
+2024-02-02 19:28:42,374:INFO:Planning Module: ```json
+{
+  "current_goal": "Build a small shelter",
+  "high_level_steps": [
+    "Step 1: Use 'explore.exploreUntil' to find a suitable location for the shelter, preferably near resources like wood and stone.",
+    "Step 2: Use 'mineType.mineBlockType' to gather 20 blocks of wood from nearby trees.",
+    "Step 3: Use 'craft.craftItem' to convert the collected wood into wooden planks.",
+    "Step 4: Use 'place.placeItem' to build the walls and roof of the shelter using the wooden planks.",
+    "Step 5: Use 'mineType.mineBlockType' to gather 3 blocks of sand.",
+    "Step 6: Use 'smelt.smeltItem' to turn the sand into glass using any available fuel.",
+    "Step 7: Use 'place.placeItem' to install glass panes for windows in the shelter."
+  ]
+}
+```

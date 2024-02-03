@@ -16,20 +16,9 @@ async function mineBlockType(bot, name, count = 1) {
         count: count,
     });
 
-    // const visibleBlocks = [];
-    // // Check each found block to see if the bot can see it
-    // for (const block of blocks) {
-    //     if (bot.canSeeBlock(bot.blockAt(block))) {
-    //         visibleBlocks.push(block);
-    //         if (visibleBlocks.length >= count) {
-    //             break; // Stop once we have enough visible blocks
-    //         }
-    //     }
-    // }
-
     if (blocks.length === 0) {
         bot.chat(`No ${name} nearby, please explore first`);
-        return;
+        return false;
     }
     console.log(blocks.length, 'blocks found')
 
@@ -52,6 +41,8 @@ async function mineBlockType(bot, name, count = 1) {
         timeout: 5000000
     });
     bot.chat(`Mined some ${name}`)
+    
+    return true;
 }
 
 module.exports = { mineBlockType };

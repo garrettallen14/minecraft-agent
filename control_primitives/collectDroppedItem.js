@@ -1,5 +1,5 @@
 async function collectDroppedItem(bot, name, maxDistance=64) {
-    num_picked_up = 0;
+    
     for (const entity of Object.values(bot.entities)) {
         // Check if the entity is an item
         if (entity.name === 'item') {
@@ -13,13 +13,13 @@ async function collectDroppedItem(bot, name, maxDistance=64) {
                     await bot.pathfinder.setGoal(goal);
 
                     bot.chat(`Navigating to ${name} at ${entity.position}`);
-                    break;
+                    return true;
                 }
             }
         }
     }
 
-    return;
+    return false;
 }
 
 function distanceTo(pos1, pos2) {

@@ -34,6 +34,7 @@ async function craftItem(bot, name, count = 1) {
     } else {
         failedCraftFeedback(bot, name, itemByName, craftingTable);
     }
+    return true;
 }
 
 function failedCraftFeedback(bot, name, item, craftingTable) {
@@ -95,6 +96,7 @@ function failedCraftFeedback(bot, name, item, craftingTable) {
             }
         }
         bot.chat(`I cannot make ${name} because I need: ${message}`);
+        return false;
     }
 }
 

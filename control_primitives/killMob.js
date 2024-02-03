@@ -27,7 +27,7 @@ async function killMob(bot, mobName, timeout = 300) {
     );
     if (!entity) {
         bot.chat(`No ${mobName} nearby, please explore first`);
-        return;
+        return false;
     }
 
     let droppedItem;
@@ -41,6 +41,7 @@ async function killMob(bot, mobName, timeout = 300) {
     if (droppedItem) {
         await bot.collectBlock.collect(droppedItem, { ignoreNoPath: true });
     }
+    return true;
 }
 
 

@@ -11,13 +11,13 @@ async function shoot(bot, weapon, target) {
     ];
     if (!validWeapons.includes(weapon)) {
         bot.chat(`${weapon} is not a valid weapon for shooting`);
-        return;
+        return false;
     }
 
     const weaponItem = mcData.itemsByName[weapon];
     if (!bot.inventory.findInventoryItem(weaponItem.id, null)) {
         bot.chat(`No ${weapon} in inventory for shooting`);
-        return;
+        return false;
     }
 
     const targetEntity = bot.nearestEntity(
@@ -26,11 +26,12 @@ async function shoot(bot, weapon, target) {
     );
     if (!targetEntity) {
         bot.chat(`No ${target} nearby`);
-        return;
+        return false;
     }
     bot.hawkEye.autoAttack(targetEntity, "bow");
     bot.on('auto_shot_stopped', (target) => {
     })
+    return true;
 }
 
 module.exports = { shoot };
