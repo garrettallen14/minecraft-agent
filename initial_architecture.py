@@ -1,9 +1,12 @@
+# Deprecated for now
+
 logging.info('Bot is starting up...')
 
 # Generate some Tasks and Execute them
 previous_tasks, previous_actions = [], []
 while True:
 
+    attempts = 0
     while True:
         try:
             # Create a Goal and High-Level Plan
@@ -12,17 +15,22 @@ while True:
                 'previous_tasks': previous_tasks,
                 'bot_functions': bot_functions,
             }).content
-            plan = json.loads(plan)
+            plan = findAndParseJsonLikeText(plan)[0]
             break
         except:
             print('Error loading json in Planning Module...')
+            attempts += 1
+            if attempts == 5: break
             continue
+
 
     logging.info(f'Planning Module: {plan}')
 
     # We have a current goal and a high level plan to achieve it
     current_goal = plan['current_goal']
+    print(f'Current Goal: {current_goal}')
     plan = plan['high_level_steps']
+    print(f'High Level Plan: {plan}')
 
     # Execute on this plan
     while True:
@@ -37,13 +45,14 @@ while True:
                     'previous_actions': previous_actions,
                     'bot_functions': bot_functions
                 }).content
-                decide_action = json.loads()
+
+                decide_action = findAndParseJsonLikeText(decide_action)[0]
                 break
             except:
                 print('Error loading json in Decision Module...')
                 continue
-
-
+        
+        
         # decide_action = json.loads(decide_action)
         decision = decide_action['decision']
 
@@ -71,16 +80,24 @@ while True:
             # Attempt to execute this action
             previous_attempts = []
             while True:
-                action_module = llms['action_module'].invoke({
-                    'current_environment': getPromptInfo(bot),
-                    'current_goal': decision,
-                    'previous_attempts': previous_attempts,
-                    'bot_functions': bot_functions
-                }).content
+                    
+                while True:
+                    try:
 
-                # This should be a function that we can execute
-                # action_module = json.loads(action_module)
-                action_module = json.loads()
+                        action_module = llms['action_module'].invoke({
+                            'current_environment': getPromptInfo(bot),
+                            'current_goal': decision,
+                            'previous_attempts': previous_attempts,
+                            'bot_functions': bot_functions
+                        }).content
+
+                        # This should be a function that we can execute
+                        action_module = findAndParseJsonLikeText(action_module)[0]
+                        break
+                    except:
+                        print('Error loading json in Action Module...')
+                        continue
+                
                 action = action_module['action']
 
                 logging.info(f'Action Module: {action_module}')

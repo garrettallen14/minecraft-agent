@@ -1,15 +1,18 @@
 async function craftItem(bot, name, count = 1) {
     // return if name is not string
     if (typeof name !== "string") {
-        throw new Error("name for craftItem must be a string");
+        console.log("name for craftItem must be a string");
+        return false;
     }
     // return if count is not number
     if (typeof count !== "number") {
-        throw new Error("count for craftItem must be a number");
+        bot.chat("count for craftItem must be a number");
+        return false;
     }
     const itemByName = mcData.itemsByName[name];
     if (!itemByName) {
-        throw new Error(`No item named ${name}`);
+        bot.chat(`No item named ${name}`);
+        return false;
     }
     const craftingTable = bot.findBlock({
         matching: mcData.blocksByName.crafting_table.id,
@@ -40,7 +43,8 @@ async function craftItem(bot, name, count = 1) {
 function failedCraftFeedback(bot, name, item, craftingTable) {
     const recipes = bot.recipesAll(item.id, null, craftingTable);
     if (!recipes.length) {
-        throw new Error(`No crafting table nearby`);
+        bot.chat(`No crafting table nearby`);
+        return false;
     } else {
         const recipes = bot.recipesAll(
             item.id,

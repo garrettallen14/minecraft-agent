@@ -1,11 +1,13 @@
 async function killMob(bot, mobName, timeout = 300) {
     // return if mobName is not string
     if (typeof mobName !== "string") {
-        throw new Error(`mobName for killMob must be a string`);
+        bot.chat(`mobName for killMob must be a string`);
+        return false;
     }
     // return if timeout is not number
     if (typeof timeout !== "number") {
-        throw new Error(`timeout for killMob must be a number`);
+        bot.chat(`timeout for killMob must be a number`);
+        return false;
     }
 
     const weaponsForShooting = [
@@ -23,7 +25,7 @@ async function killMob(bot, mobName, timeout = 300) {
         (entity) =>
             entity.name === mobName &&
             // kill mob distance should be slightly bigger than explore distance
-            entity.position.distanceTo(bot.entity.position) < 48
+            entity.position.distanceTo(bot.entity.position) < 32
     );
     if (!entity) {
         bot.chat(`No ${mobName} nearby, please explore first`);

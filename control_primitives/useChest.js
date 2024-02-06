@@ -35,9 +35,10 @@ async function depositItemIntoChest(bot, chestPos, itemsToDeposit, count) {
     const chestPosition = new Vec3(chestPos.x, chestPos.y, chestPos.z);
     // return if chestPosition is not Vec3
     if (!(chestPosition instanceof Vec3)) {
-        throw new Error(
+        bot.chat(
             "chestPosition for depositItemIntoChest must be a Vec3"
         );
+        return false;
     }
     await moveToChest(bot, chestPosition);
     const chestBlock = bot.blockAt(chestPosition);
@@ -81,9 +82,10 @@ async function depositItemIntoChest(bot, chestPos, itemsToDeposit, count) {
 async function moveToChest(bot, chestPos) {
     const chestPosition = new Vec3(chestPos.x, chestPos.y, chestPos.z);
     if (!(chestPosition instanceof Vec3)) {
-        throw new Error(
+        bot.chat(
             "chestPosition for depositItemIntoChest must be a Vec3"
         );
+        return false;
     }
     if (chestPosition.distanceTo(bot.entity.position) > 32) {
         bot.chat(
@@ -94,9 +96,10 @@ async function moveToChest(bot, chestPos) {
     const chestBlock = bot.blockAt(chestPosition);
     if (chestBlock.name !== "chest") {
         bot.emit("removeChest", chestPosition);
-        throw new Error(
+        bot.chat(
             `No chest at ${chestPosition}, it is ${chestBlock.name}`
         );
+        return false;
     }
     await bot.pathfinder.goto(
         new pathfinder.goals.GoalLookAtBlock(chestBlock.position, bot.world, {})

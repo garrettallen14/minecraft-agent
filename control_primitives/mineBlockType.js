@@ -1,14 +1,17 @@
 async function mineBlockType(bot, name, count = 1) {
     // return if name is not string
     if (typeof name !== "string") {
-        throw new Error(`name for mineBlock must be a string`);
+        bot.chat(`name for mineBlock must be a string`);
+        return false;
     }
     if (typeof count !== "number") {
-        throw new Error(`count for mineBlock must be a number`);
+        bot.chat(`count for mineBlock must be a number`);
+        return false;
     }
     const blockByName = mcData.blocksByName[name];
     if (!blockByName) {
-        throw new Error(`No block named ${name}`);
+        bot.chat(`No block named ${name}`);
+        return false;
     }
     const blocks = bot.findBlocks({
         matching: [blockByName.id],

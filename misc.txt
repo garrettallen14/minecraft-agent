@@ -1,7 +1,0 @@
-Next Steps:
-
-1. Get GPT working nicely, formatting responses in JSON in a familiar way
-    - Really dial this one in
-    - Separate out subgoals
-2. Get the action, prediction, outcome loop going for each subgoal
-3. Instill each portion with memory of its own

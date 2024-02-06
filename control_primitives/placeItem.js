@@ -6,20 +6,23 @@ async function placeItem(bot, name, target) {
     
     // return if name is not string
     if (typeof name !== "string") {
-        throw new Error(`name for placeItem must be a string`);
+        bot.chat(`name for placeItem must be a string`);
+        return false;
     }
     // return if position is not Vec3
     if (!(position instanceof Vec3)) {
-        throw new Error(`position for placeItem must be a Vec3`);
+        bot.chat(`position for placeItem must be a Vec3`);
+        return false;
     }
     const itemByName = mcData.itemsByName[name];
     if (!itemByName) {
-        throw new Error(`No item named ${name}`);
+        bot.chat(`No item named ${name}`);
+        return false;
     }
     const item = bot.inventory.findInventoryItem(itemByName.id);
     if (!item) {
         bot.chat(`No ${name} in inventory`);
-        return;
+        return false;
     }
     const item_count = item.count;
     // find a reference block

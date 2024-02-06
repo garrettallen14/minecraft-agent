@@ -8,10 +8,12 @@ async function exploreUntil(
     }
 ) {
     if (typeof maxTime !== "number") {
-        throw new Error("maxTime must be a number");
+        bot.chat("maxTime must be a number");
+        return false;
     }
     if (typeof callback !== "function") {
-        throw new Error("callback must be a function");
+        bot.chat("callback must be a function");
+        return false;
     }
     const test = callback();
     if (test) {
@@ -19,7 +21,8 @@ async function exploreUntil(
         return Promise.resolve(test);
     }
     if (direction.x === 0 && direction.y === 0 && direction.z === 0) {
-        throw new Error("direction cannot be 0, 0, 0");
+        bot.chat("direction cannot be 0, 0, 0");
+        return false;
     }
     if (
         !(
@@ -28,9 +31,8 @@ async function exploreUntil(
             (direction.z === 0 || direction.z === 1 || direction.z === -1)
         )
     ) {
-        throw new Error(
-            "direction must be a Vec3 only with value of -1, 0 or 1"
-        );
+        bot.chat("direction must be a Vec3 only with value of -1, 0 or 1");
+        return false;
     }
     maxTime = Math.min(maxTime, 1200);
     return new Promise((resolve, reject) => {

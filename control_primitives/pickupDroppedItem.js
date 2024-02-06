@@ -1,4 +1,4 @@
-async function collectDroppedItem(bot, name, maxDistance=64) {
+async function pickupDroppedItem(bot, name, maxDistance=64) {
     
     for (const entity of Object.values(bot.entities)) {
         // Check if the entity is an item
@@ -30,4 +30,4 @@ function distanceTo(pos1, pos2) {
     );
 }
 
-module.exports = { collectDroppedItem };
+module.exports = { pickupDroppedItem };
