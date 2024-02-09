@@ -1,0 +1,118 @@
+Tool calling: Agent initialized -> Update Goal -> New Goal + Plan -> Act -> Act -> Act -> ... -> Update Goal + Plan -> Act -> ...
+Global variables for the Agent:
+    - current goal + plan
+    - action + outcome pairs
+    - current goal progress
+    - Agent scratchpad
+    - previous goals + outcomes
+
+WORKFLOWS
+Update Goal+Plan:
+1. Observe previous goal and (action+outcome sequence), produce some key lessons learned.
+    - Store this lesson learned in a Vector DB encoded by the description of the goal
+2. Query perception for the next best goal
+3. Query perception for best plan
+4. Return this goal + plan
+
+Action:
+1. Debate next best action based on previous (action + outcomes) + (current goal progress)
+    - Utilize perception queries to inform the debate
+    - Store each perception query answer to Memory
+2. Perform next best action
+3. Take action performed + previous state + new state and summarize changes wrt goal progress
+4. Take previous (action+outcomes) + previous goal progress + new action+outcome + new state and combine into new current goal progress
+5. Return new action+outcome + current goal progress
+
+Memory:
+- Simply stores, inserts, and updates the vector DB
+
+Perception:
+- Implement Google Self-Discover QA paradigm
+- Takes in Query. If it can answer in one go, answer in one go.
+- Otherwise, if it needs deep thinking, Self-Discover will take over and come out with an answer
+
+
+Needs:
+1. Memory Vector DB store
+    - Goal lessons learned
+    - Perceptions
+    - Chests + what is stored in them
+    - Need ways to store + retrieve
+
+2. Perception Module
+    - Takes in Query
+    - Option 1: answer in one go.
+    - Option 2: think about it
+        - Select, adapt, implement, then work all the way through to the final answer.
+
+3. Action Module
+    - Takes in previous action+outcomes + current goal progress
+    - Query perception module to determine next best action
+    - Store perception into memory bank
+    - Perform next best action
+    - Summarize environment changes wrt goal progress
+    - Get new goal progress string
+    - Return new action+outcome pair and current goal progress
+
+4. Goal+Plan Module
+    - Takes in previous Goal(action+outcome) results, summarizes for key takeaways
+    - Stores key takeaways in memory bank
+    - Query perception for best next goal
+    - Store perception
+    - Query perception for best plan for best next goal
+    - Store perception
+    - Return new goal+plan
+
+5. Create Agent
+    - Has a scratchpad
+    - Can call UpdateGoal+Plan
+    - Can call Act
+    - Can call Perceive with a given query
+
+
+
+Definitions:
+Note: need to define how to store conversations / deal with responding to chat messages
+
+UPDATE GOAL + PLAN: Return a New Goal and Heuristic Plan
+- New Goal: Best logical next goal given
+    - Previous goals + outcome lessons (based on relevance to current state or proposed goal)
+    - Current environment + perceptions (based on proposed goal)
+- Lessons from Previous Goal: Summarize lessons from action + observation pairs during the goal completion
+    - Each action performed during a goal completion session has a subsequent observation
+    - Each action + observation is added to a list, which is maintained in chronological order until the Agent decides to update goal
+    - When the Agent decides to update the goal, this list is analyzed for key takeaway and lessons, then the list is erased
+    - Store the lessons in Task Observation Memory
+    - The lessons in Task Observation Memory are utilized for generating new plans
+- New Plans: Most educated and complete heuristic plans to complete the New Goal
+
+
+ACT: Returns the ((Best Next) Action performed + Observation) + Progress towards goal
+- Action + Observation: 
+    - When a "Best Next Action" is completed, we then compare the previous world state to the current world state
+    - We analyze differences and what impact we can gather this action had towards our goal.
+- Best Next Action:
+    - Based on the {perceived environment} + {previous (action + outcomes)} + {current goal progress}
+    - Generate the next best action for the Agent
+    - Also consider some hard coded preferences (prompt says the Bot MUST prioritize self-preservation over anything else, and SHOULD prioritize social interaction over other goals)
+- Goal Progress:
+    - Single string which stores our overall estimated progress towards a given goal
+    - Compares our new state + new (action + outcome) + previous (actions + outcomes) + {current goal progress} and updates the current goal progress
+
+PERCEIVE: Returns a summary of what the module decided was the Bot's perception based on a given query
+- Implements the task / question answering paradigm from Google
+Ex: perceive(any wood in the local area)
+    i. basic prompt will say that the bot is in 'plains biome'
+    ii. perceive module will call "bot.blocksAt('oak_log', maxDistance=64)" and this will return true, which implies there is wood nearby
+    iii. the perceive module will summarize what it did and what it learned, and this is the answer to the question if there is any wood in the area
+- Peceive Module: Returns answer to a query
+    - Has access to commands to search for any memories
+    - Has access to all observation functions
+    - Given any query, will try its best to respond with a useful answer
+    - Each perception answer is stored into a Vector DB by Vec3 coords + time + perception
+
+MEMORY
+- Memories:
+    - All {goal action sequence lessons} + {descriptions}
+    - Any perception answer is stored by Vec3 coordinates + time
+    - All new chests, beds, crafting tables have locations stored by Vec3 coords + time + description of item
