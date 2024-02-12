@@ -1,0 +1,93 @@
+import perception_llms
+import json
+from javascript import require, globalThis
+findAndParseJsonLikeText = require('json-like-parse')
+import env_info
+
+# Perception functions: Vision, Memory, Explore, findBlockType (mcData), bot.lookAt
+import memory
+import vision
+explore = globalThis.explore #require('./control_primitives/exploreUntil.js')
+mcData = globalThis.mcData #require('minecraft-data')('1.20.2')
+
+class Module:
+    def __init__(self):
+        self.llms = perception_llms.get_llms()
+        self.perception_functions = json.loads(open('perception_functions.json').read())
+        self.mem = memory.Module()
+
+    def perceive(self, bot, task):
+        relevant_reasoning_modules = self.llms['select'].invoke({
+            'task': task
+        }).content
+        adapted_reasoning_modules = self.llms['adapt'].invoke({
+            'task': task,
+            'relevant_reasoning_modules': relevant_reasoning_modules
+        }).content
+        implemented_reasoning_modules = self.llms['implement'].invoke({
+            'task': task,
+            'adapted_reasoning_modules': adapted_reasoning_modules,
+            'perception_functions': self.perception_functions
+        }).content
+        subtasks = findAndParseJsonLikeText(implemented_reasoning_modules)[0]
+        environment = {'environment': str(env_info.getPromptInfo(bot)), 'Additional Information': []}
+        attempt = 1
+        previous_attempts = []
+        while attempt <= 3:
+            response = self.llms['perceive'].invoke({
+                'task': task,
+                'subtasks': subtasks,
+                'environment': environment,
+                'current_attempt': attempt,
+                'perception_functions': self.perception_functions,
+                'previous_attempts': previous_attempts
+            }).content
+            print(f'{response=}')
+
+            if 'COMPLETED' in response:
+                print(f'Completed task: {response.split("COMPLETED")[1]}')
+                break
+
+            # revisit this portion
+            else:
+                try:
+                    global output
+                    output = None
+
+                    exec(f"global output\noutput = {response}")
+                    if 'findBlockType' in response:
+                        if output:
+                            response = f'{response} was found in the world at: {output.position}!'
+                        else:
+                            response = f'{response} was not found in this location!'
+                    
+                    else:
+                        environment['Additional Information'].append(output)
+                        response += f': {output}'
+
+                except:
+                    environment['environment'] = str(env_info.getPromptInfo(bot))
+
+            previous_attempts.append([f'Attempt Number: {attempt}', response])
+            print(previous_attempts)
+
+            attempt += 1
+        
+        # Store this response in the Perception Memory database collection
+        self.mem.store_memory(response, 'general_perceptions')
+
+        return response
+
+
+    def findBlockType(self, bot, name, maxDistance=32):
+        block = bot.findBlock({
+            'matching': mcData.blocksByName[name].id,
+            'maxDistance': maxDistance
+        })
+        
+        return block
+    
+    def askLLM(self, question):
+        return self.llms['ask'].invoke({
+            'question': question
+        }).content

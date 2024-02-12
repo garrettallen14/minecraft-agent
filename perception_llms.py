@@ -103,46 +103,51 @@ Implement a simple and efficient reasoning structure for solvers to follow step-
 # Utilize the format of the EXAMPLE to create the Operationalized Reasoning Plan. ie, "Subtask": ""
 Operationalized Reasoning Plan:"""
 
-    perceive = """Task Completion Guidance for Minecraft Assistant
+    perceive = """Minecraft Assistant Task Guidance
 
-Objective: You are tasked with completing a specific Task in Minecraft. Your success depends on efficiently gathering information needed to suitably complete the Task.
-<i>Side note: A Task can be a question or a problem you must answer.</i>
+Objective: Complete the designated Task in Minecraft. The Task might be a question or a challenge that requires a solution. Your goal is to gather the necessary information to accomplish this efficiently.
 
-Instructions:
+How to Proceed:
 
-Response Options:
-Option 1: If you require more information to progress, request a specific perception function call. This should enhance your understanding of the Minecraft environment and assist in solving the subtasks. Format your request precisely as shown in the perception functions list.
-Example: requestBlockType('oak_log', 20)
-Example: vision.visionModule('Place query here.')
-Option 2: If you believe you have completed the main task or if it's your final attempt, summarize your findings and solutions concisely.
-Example: COMPLETED: I have successfully located and collected oak wood from the forest located to the east, approximately 30 seconds from my starting point.
+If you need more information: Request specific data using one of the Perception Functions. This will help you understand the Minecraft environment better and solve the Task. Use the exact format from the provided list of Perception Functions.
+
+If you need more information:
+Examples: 
+- self.findBlockType(bot, 'oak_log', 20)
+- vision.visionModule('Your query here.')
+- mem.query_memories('Your memory-related question here.')
+
+If you're ready to conclude: Summarize your findings and the outcome of the Task. Use this option for your final response or if you believe the Task is completed.
+Example: 
+- 'COMPLETED: Statement of the information gathered, etc...'
+
 Task Details:
 
-Main Task: {task}
-Helpful Subtasks: {subtasks}
-Perception Functions:
-{perception_functions}
-
-Collected Information:
-Environment: {environment}
+- Main Task: {task}
+- Subtasks: {subtasks}
+- Perception Functions: {perception_functions}
+- Environment: {environment}
 
 Attempts:
+- Previous Attempts {previous_attempts}
+AVOID NEEDLESS REPETITION AT ALL COSTS...
+You have 3 total attempts. Use the final attempt to either conclude or if absolutely necessary, state the need for more information.
+Summarize previous attempts without repetition, tailoring your response to the Task.
 
-You have a total of 3 attempts to respond.
-If you are on your third attempt, you must use Option 2 to conclude your findings.
-Important:
-
-Avoid repeating responses from previous attempts.
-Ensure your response is tailored to either gather more information or conclude the task based on the options provided.
-Follow the examples closely for formatting your response correctly.
+Note:
+- Be economical in your number of attempts.
+- Follow the formatting examples precisely.
+- If calling a function, the RESPONSE provided will execute with exact syntax given. You must ensure that the syntax is correct for execution in Python. Use the provided examples as a guide.
+- On the third attempt (when Current Attempt == 3), you MUST use "COMPLETED" to conclude.
 Current Attempt: {current_attempt}
-
-Summary of Previous Attempts: {previous_attempts}
-
-# Remember, when calling functions, you must adhere to the exact format as shown in the perception functions list.
+# Respond here with only a single call to a Perception Function or a summary of the COMPLETED Task.
 RESPONSE:"""
 
-    return {'select': select, 'adapt': adapt, 'implement': implement, 'perceive': perceive}
+    ask = """You are a Minecraft helper bot. A user will ask you an arbitrary question within the context of the video game Minecraft, and you will respond with the answer.
+Question: {question}
+Answer:"""
+
+    return {'select': select, 'adapt': adapt, 'implement': implement, 'perceive': perceive, 'ask': ask}
 
 def get_llms(query=''):
         load_dotenv()

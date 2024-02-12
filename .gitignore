@@ -1,2 +1,4 @@
 .env
 mineflayer_vision.json
+
+__pycache__

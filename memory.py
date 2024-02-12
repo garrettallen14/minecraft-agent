@@ -20,7 +20,8 @@ class Module:
         self.collections = {
             'goal_lessons_learned': self.database.get_or_create_collection('goal_lessons'),
             'general_perceptions': self.database.get_or_create_collection('general_perceptions'),
-            'important_locations': self.database.get_or_create_collection('important_locations')
+            'important_locations': self.database.get_or_create_collection('important_locations'),
+            'core_memories': self.database.get_or_create_collection('core_memories')
         }
 
         self.mem_llms = memory_llms.get_llms()
@@ -78,8 +79,7 @@ class Module:
 
         # Embed the memory
         embedded_memory = self.embeddings.embed_documents([memory])
-    
-        print(embedded_memory)
+
         # Add into the proper database collection
         self.collections[collection_name].upsert(
             ids = [f'{int(self.collections[collection_name].count()) + 1}'],
