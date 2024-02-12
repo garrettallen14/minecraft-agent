@@ -33,17 +33,18 @@ Perception:
 
 
 Needs:
-1. Memory Vector DB store
-    - Goal lessons learned
-    - Perceptions
-    - Chests + what is stored in them
-    - Need ways to store + retrieve
-
-2. Perception Module
+1. Perception Module
     - Takes in Query
     - Option 1: answer in one go.
     - Option 2: think about it
         - Select, adapt, implement, then work all the way through to the final answer.
+    - Test out all capabilities
+
+2. Memory Vector DB store
+    - Goal lessons learned
+    - Perceptions
+    - Chests + what is stored in them
+    - Need ways to store + retriever
 
 3. Action Module
     - Takes in previous action+outcomes + current goal progress
