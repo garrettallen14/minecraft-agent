@@ -29,7 +29,7 @@ class Module:
             'adapted_reasoning_modules': adapted_reasoning_modules,
             'perception_functions': self.perception_functions
         }).content
-        subtasks = findAndParseJsonLikeText(implemented_reasoning_modules)[0]
+        subtasks = implemented_reasoning_modules
         environment = {'environment': str(env_info.getPromptInfo(bot)), 'Additional Information': []}
         attempt = 1
         previous_attempts = []
@@ -49,8 +49,13 @@ class Module:
                 break
 
             # revisit this portion
-            else:
+            if 'perception_function' in response:
                 try:
+                    response = findAndParseJsonLikeText(response)[0]['perception_function']
+                except:
+                    response = 'Invalid perception_function call format detected. Please try again.'
+                try:
+                    
                     global output
                     output = None
 

@@ -63,8 +63,13 @@ objectives?
 
 Task: {task}
 # Select the top reasoning modules that are crucial to utilize in order to solve the given Task.
-# Respond only with the top Relevant Reasoning Modules in their full sentences and nothing else.
-Most Relevant Reasoning Modules: """
+
+Respond in the following JSON Format:
+    "scratchpad_for_thoughts": "In this value section, think through your thoughts before selecting the reasoning modules.",
+    "reasoning_modules": "First Reasoning Module, Another Reasoning Module, Again a different Reasoning Module, ..."
+
+In the value for the "reasoning_modules" key, only respond with the top Relevant Reasoning Modules in their full sentences and nothing else.
+JSON Formatted Response: """
 
     adapt = """SYSTEM: You are a Minecraft Task Completion Assistant. You are given a task to complete in Minecraft.
 Rephrase and specify the best reasoning modules to better help solving the Minecraft Task.
@@ -72,9 +77,12 @@ Task: {task}
 SELECTED REASONING MODULES:
 {relevant_reasoning_modules}
 
-# Adapt each REASONING MODULE description to better solve the Task in Minecraft.
-# Respond with the Minecraft adapted REASONING MODULES.
-Adapted Reasoning Modules: """
+Adapt each REASONING MODULE description to better solve the Task in Minecraft.
+Respond in the following JSON Format:
+    "scratchpad_for_thoughts": "In this value section, think through your thoughts before adapting the reasoning modules.",
+    "adapted_reasoning_modules": "First Adapted Reasoning Module, Another Adapted Reasoning Module, Again a different Adapted Reasoning Module, ..."
+
+JSON Formatted Response: """
 
     implement = """SYSTEM: You are a Minecraft Task Completion Assistant. You are given a task to complete in Minecraft.
 Operationalize the reasoning modules into a step-by-step reasoning plan in JSON format:
@@ -98,10 +106,15 @@ Task: {task}
 Adapted Reasoning Modules:
 {adapted_reasoning_modules}
 
-Implement a simple and efficient reasoning structure for solvers to follow step-by-step and arrive at the correct answer to the Task.
-# Respond in JSON format, and remember this is in Minecraft.
-# Utilize the format of the EXAMPLE to create the Operationalized Reasoning Plan. ie, "Subtask": ""
-Operationalized Reasoning Plan:"""
+Respond in JSON Format with the following structure:
+    "scratchpad_for_thoughts": "In this value section, think through your thoughts before operationalizing the reasoning plan.",
+    "operationalized_reasoning_plan":
+        "subtask_1": "First potentially useful subtask.",
+        "subtask_2": "Second potentially useful subtask.",
+        ...
+
+# Respond with a step-by-step reasoning plan in JSON format.
+JSON Formatted Response: """
 
     perceive = """Minecraft Assistant Task Guidance
 
@@ -111,41 +124,46 @@ How to Proceed:
 
 If you need more information: Request specific data using one of the Perception Functions. This will help you understand the Minecraft environment better and solve the Task. Use the exact format from the provided list of Perception Functions.
 
-If you need more information:
-Examples: 
-- self.findBlockType(bot, 'oak_log', 20)
-- vision.visionModule('Your query here.')
-- mem.query_memories('Your memory-related question here.')
-
-If you're ready to conclude: Summarize your findings and the outcome of the Task. Use this option for your final response or if you believe the Task is completed.
-Example: 
-- 'COMPLETED: Statement of the information gathered, etc...'
-
 Task Details:
 
 - Main Task: {task}
-- Subtasks: {subtasks}
+- Potential Helpful Subtasks: {subtasks}
 - Perception Functions: {perception_functions}
 - Environment: {environment}
 
 Attempts:
 - Previous Attempts {previous_attempts}
 AVOID NEEDLESS REPETITION AT ALL COSTS...
-You have 3 total attempts. Use the final attempt to either conclude or if absolutely necessary, state the need for more information.
+You have 3 total attempts, and this is attempt number {current_attempt}. If this is the final attempt, then you must conclude with COMPLETED (see below for information on COMPLETED).
 Summarize previous attempts without repetition, tailoring your response to the Task.
+
+Here are your two options for responses to the Task:
+Option 1: If you need more information, use a Perception Function to gather more information.
+In this case, you are to respond in JSON Format with the following structure:
+    "scratchpad_for_thoughts": "In this value section, think through your thoughts before proceeding.",
+    "perception_function": "exact syntacic Python call to the function you are choosing to perform, with appropriate variable inputs. This will be executed directly from the response, so you must ensure that the syntax is correct for execution in Python."
+
+Option 2: If you have gathered sufficient information to complete the Task, then you are to Summarize the COMPLETED Task.
+In this case, you are to respond in JSON Format with the following structure:
+    "scratchpad_for_thoughts": "In this value section, think through your thoughts before proceeding.",
+    "COMPLETED": "Summary of your findings from the Environment and Additional Information in regard to having COMPLETED the Task."
 
 Note:
 - Be economical in your number of attempts.
-- Follow the formatting examples precisely.
-- If calling a function, the RESPONSE provided will execute with exact syntax given. You must ensure that the syntax is correct for execution in Python. Use the provided examples as a guide.
-- On the third attempt (when Current Attempt == 3), you MUST use "COMPLETED" to conclude.
+- Follow the formatting examples precisely for either respective Option.
+- Summarize with great detail and clarity.
+- On the third attempt (when Current Attempt == 3), you MUST use Option 2 and respond with "COMPLETED" to conclude.
 Current Attempt: {current_attempt}
-# Respond here with only a single call to a Perception Function or a summary of the COMPLETED Task.
-RESPONSE:"""
+JSON Formatted Response:"""
 
     ask = """You are a Minecraft helper bot. A user will ask you an arbitrary question within the context of the video game Minecraft, and you will respond with the answer.
 Question: {question}
-Answer:"""
+
+Respond with the answer to the question in the following JSON format:
+    "reasoning": "In this value section, provide a detailed and thought through reasoning for your answer",
+    "answer": "Your answer to the question"
+
+JSON Formatted Response to the Question:"""
 
     return {'select': select, 'adapt': adapt, 'implement': implement, 'perceive': perceive, 'ask': ask}
 

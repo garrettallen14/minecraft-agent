@@ -16,8 +16,12 @@ Previous Action / Outcomes: {previous_action_outcomes}
 Current Goal Progress: {current_goal_progress}
 
 Utilize this information to craft a Question for the Perception Module that will help you gather information to help you decide your next best action to complete your Goal.
-# The Perception Module has no knowledge of the Previous Action / Outcomes or the Current Goal Progress, so if you would like the Perception Module to use this information, you must include this in your Question to the Perception Module.
-Question:"""
+Respond with your Question in the following JSON format:
+    "reasoning": "detailed and thought through reasoning for your question to the Perception Module",
+    "question": "Your question to the Perception Module"
+
+# Think through your answer, and enter a Question to the Perception Module in JSON Format.
+JSON Formatted Response:"""
 
     generate_next_best_action = """As a Minecraft helper bot, your task is to use the information below to decide your next best action to complete your Goal.
 
@@ -32,14 +36,57 @@ Here is what you discovered:
 Question: {question}
 Answer: {answer}
 
-Utilize this information to decide your next best action to complete your Goal.
+Ignore this below if both the Proposed Action and Rejection Information are empty:
+You may have also recently proposed an action to the bot, and the bot may have rejected it. Here is the information about the proposed action:
+Proposed Action: {proposed_action}
+Rejection Information: {additional_information}
+
+Utilize all of this information to decide your next best action to complete your Goal.
 Here are your choices for your next best action:
 {bot_functions}
 
-# Respond here with your next best action to complete your Goal.
-# Be extremely specific in what item you are calling for. The function will not execute unless the exact item name is properly called.
-# Your response will be directly executed upon submission, so you must ensure proper syntax and accuracy.
-Next Best Action:"""
+Respond in JSON format in the following structure:
+    "reasoning": "detailed and thought through reasoning for your choice of action",
+    "next_best_action": "Exact syntactic Python call to the function your are choosing to perform. This should be a string with the function name and variable inputs to be executed."
+
+# Respond here in the JSON format, using "reasoning" then "next_best_action" as your keys.
+JSON Formatted Response:"""
+
+    gate_action = """As a Minecraft assistant, your role is to steer the bot away from actions that don't align with our strategy or the game's logic. When considering the next move, we must ensure it's the right step towards our objective, feasible with our current resources, and a fresh approach if previous attempts haven't worked.
+
+Your mission is to evaluate a suggested action for the bot. Take into account:
+
+The goal we're aiming for,
+The current state of the game environment,
+The outcomes of what we've tried before,
+Our progress towards the objective.
+You'll review a proposed action. Here's your task:
+
+Analyze if the suggested action makes sense given our current situation and goals.
+Check if we have the necessary tools and if the action is practical in the current game environment.
+Ensure the action isn't a repeat of an unsuccessful past attempt that didn't move us closer to our goal.
+Imagine the bot plans to mine iron but lacks the basic tools, like a wooden pickaxe. Your advice should guide it to first gather the essentials, like wood, to craft the needed tools before attempting to mine iron.
+
+********* Relevant Informations: *********
+Goal: {goal}
+Current Environment: {current_environment}
+Previous Action / Outcomes: {previous_action_outcomes}
+Current Goal Progress: {current_goal_progress}
+Proposed Action: {next_best_action}
+*********************************
+
+Please reply in JSON format, structured as follows:
+"reasoning": Provide a detailed rationale for your verdict on the proposed action.
+"gate": Indicate with TRUE or FALSE whether the action should proceed.
+"description": If FALSE, explain why the action is not suitable, offering guidance that will be relayed back to the bot to improve its strategy.
+
+Example:
+Here's a template for how your response should look, adjusted for a scenario where the bot aims to efficiently collect resources but is about to skip necessary preliminary steps:
+    "reasoning": "Considering the bot's current lack of tools, it must first focus on acquiring basic materials like wood to craft the necessary tools. Attempting to mine iron ore without even a wooden pickaxe is premature. The bot should locate nearby oak trees for wood, ensuring it has the means to create a pickaxe, thus aligning its actions with a logical progression in resource gathering.",
+    "gate": "FALSE",
+    "description": "The proposed action to mine iron ore is rejected because the bot does not possess the required tools for mining. It should first collect wood to craft a wooden pickaxe."
+
+This template ensures the bot takes logical, efficient steps towards its goals without repeating ineffective actions or bypassing essential preparatory stages."""
 
     summarize_environment_changes = """As a Minecraft helper bot, your task is to use the information below to summarize the changes in the environment after you performed a given action.
 Goal: {goal}
@@ -54,10 +101,13 @@ Tasks: Utilize this information to:
     2. Take the Previous Goal Progress and update it with this information to form the New Goal Progress.
 Complete both Tasks in a single JSON formatted response.
 The response should have the following structure:
-    "environment_changes": "summary of changes in the environment after the given action",
+    "reasoning": "detailed and thought through reasoning for your summary of changes in the environment and updated goal progress",
+    "environment_changes": "detailed explanation of exactly how the action changed the environment. If no changes occured, explain why you think the function failed to do what it was supposed to.",
     "new_goal_progress": "updated goal progress based on the environment changes"
 
-# Note: If it seems nothing has changed with respect to completing the Action, it likely failed. In this case, you should try to understand what went wrong so as not to make this mistake again.
+The bot will use the environment_changes value to see what effects on the inventory or environment he has had to determine the true outcome of his action. The new_goal_progress value will be used to update the goal progress based on the environment changes.
+Note: In your reasoning, explore if environment_changes seem unchanged. If so, decide if the function simply failed to do what it was supposed to. If the function failed to have the effect it was supposed to, then in the environment_changes, explain why you think the function failed to do what it was supposed to do, so we can avoid this mistake in the future.
+
 JSON Formatted Response:"""
 
     gather_new_memories = """As a Minecraft helper bot, your primary function is to discern and preserve essential information. Below you'll find data comprising actions performed, changes in the environment, and progress toward new goals. Your task is to evaluate this information carefully and decide if any of it is critical enough to be memorized. You have access to two specialized database collections for storing this information:
@@ -77,6 +127,7 @@ Changes Since Previous Environment: {environment_changes}
 New Goal Progress: {new_goal_progress}
 
 Example structure for your JSON formatted response:
+    "reasoning": "detailed and thought through reasoning for your decision whether or not to commit any information to memory",
     "memory1": "collection_name: information worth committing to memory",
     "memory2": "collection_name: other information worth committing to memory"
 
@@ -85,7 +136,7 @@ Remember: Reserve the core_memories collection for information that is fundament
 JSON Formatted Response:"""
 
 
-    return {'generate_perception_query': generate_perception_query, 'generate_next_best_action': generate_next_best_action, 'summarize_environment_changes': summarize_environment_changes, 'gather_new_memories': gather_new_memories}
+    return {'generate_perception_query': generate_perception_query, 'generate_next_best_action': generate_next_best_action, 'gate_action': gate_action, 'summarize_environment_changes': summarize_environment_changes, 'gather_new_memories': gather_new_memories}
 
 
 
@@ -101,11 +152,11 @@ def get_llms(query=''):
 
         for key, value in prompts.items():
             # save money by using gpt-3.5-turbo-1106
-            # if key == 'action_proposal':
-            #     prompts[key] = ChatPromptTemplate.from_template(value) | llm_4
-            # else:
-            #     prompts[key] = ChatPromptTemplate.from_template(value) | llm
+            if key == 'generate_next_best_action':
+                prompts[key] = ChatPromptTemplate.from_template(value) | llm_4
+            else:
+                prompts[key] = ChatPromptTemplate.from_template(value) | llm
             
-            prompts[key] = ChatPromptTemplate.from_template(value) | llm
+            # prompts[key] = ChatPromptTemplate.from_template(value) | llm
 
         return prompts
