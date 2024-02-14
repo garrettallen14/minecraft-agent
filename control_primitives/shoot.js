@@ -10,14 +10,12 @@ async function shoot(bot, weapon, target) {
         "trident",
     ];
     if (!validWeapons.includes(weapon)) {
-        bot.chat(`${weapon} is not a valid weapon for shooting`);
-        return false;
+        throw new TypeError(`${weapon} is not a valid weapon for shooting`);
     }
 
     const weaponItem = mcData.itemsByName[weapon];
     if (!bot.inventory.findInventoryItem(weaponItem.id, null)) {
-        bot.chat(`No ${weapon} in inventory for shooting`);
-        return false;
+        throw new TypeError(`No ${weapon} in inventory for shooting`);
     }
 
     const targetEntity = bot.nearestEntity(
@@ -25,8 +23,7 @@ async function shoot(bot, weapon, target) {
             entity.name === target
     );
     if (!targetEntity) {
-        bot.chat(`No ${target} nearby`);
-        return false;
+        throw new TypeError(`No ${target} nearby`);
     }
     bot.hawkEye.autoAttack(targetEntity, "bow");
     bot.on('auto_shot_stopped', (target) => {

@@ -23,9 +23,10 @@ Respond with your Question in the following JSON format:
 # Think through your answer, and enter a Question to the Perception Module in JSON Format.
 JSON Formatted Response:"""
 
-    generate_next_best_action = """As a Minecraft helper bot, your task is to use the information below to decide your next best action to complete your Goal.
+    generate_next_best_action = """You are an extremely helpful advanced Minecraft helper, providing guidance to a bot to help it complete its Goal.
+As a Minecraft helper, your task is to use the provided image and information below to think through the situation, then decide the next best action to complete the Goal.
 
-Here is the information you will use to decide your next best action:
+Here is the information you will use to decide the next best action:
 Goal: {goal}
 Current Environment: {current_environment}
 Previous Action / Outcomes: {previous_action_outcomes}
@@ -38,15 +39,14 @@ Answer: {answer}
 
 Ignore this below if both the Proposed Action and Rejection Information are empty:
 You may have also recently proposed an action to the bot, and the bot may have rejected it. Here is the information about the proposed action:
-Proposed Action: {proposed_action}
-Rejection Information: {additional_information}
+Rejected Proposed Actions: {proposed_action}
 
 Utilize all of this information to decide your next best action to complete your Goal.
 Here are your choices for your next best action:
 {bot_functions}
 
 Respond in JSON format in the following structure:
-    "reasoning": "detailed and thought through reasoning for your choice of action",
+    "reasoning": "detailed and thought through reasoning for your choice of action. ensure you decide on what the absolute best action is to complete your goal.",
     "next_best_action": "Exact syntactic Python call to the function your are choosing to perform. This should be a string with the function name and variable inputs to be executed."
 
 # Respond here in the JSON format, using "reasoning" then "next_best_action" as your keys.
@@ -66,6 +66,7 @@ Analyze if the suggested action makes sense given our current situation and goal
 Check if we have the necessary tools and if the action is practical in the current game environment.
 Ensure the action isn't a repeat of an unsuccessful past attempt that didn't move us closer to our goal.
 Imagine the bot plans to mine iron but lacks the basic tools, like a wooden pickaxe. Your advice should guide it to first gather the essentials, like wood, to craft the needed tools before attempting to mine iron.
+You must ensure that the variable names are proper item names which exist in Minecraft. For example, if the bot is proposing to craft 'planks', you must reject this action as the correct variable name is 'oak_planks', or 'spruce_planks', etc.
 
 ********* Relevant Informations: *********
 Goal: {goal}
@@ -102,7 +103,7 @@ Tasks: Utilize this information to:
 Complete both Tasks in a single JSON formatted response.
 The response should have the following structure:
     "reasoning": "detailed and thought through reasoning for your summary of changes in the environment and updated goal progress",
-    "environment_changes": "detailed explanation of exactly how the action changed the environment. If no changes occured, explain why you think the function failed to do what it was supposed to.",
+    "environment_changes": "explain how the action contributed to environment changes. If no changes occured, explain why you think the function failed to do what it was supposed to.",
     "new_goal_progress": "updated goal progress based on the environment changes"
 
 The bot will use the environment_changes value to see what effects on the inventory or environment he has had to determine the true outcome of his action. The new_goal_progress value will be used to update the goal progress based on the environment changes.

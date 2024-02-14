@@ -1,17 +1,14 @@
 async function mineBlockType(bot, name, count = 1) {
     // return if name is not string
     if (typeof name !== "string") {
-        bot.chat(`name for mineBlock must be a string`);
-        return false;
+        throw new TypeError(`name for mineBlock must be a string`);
     }
     if (typeof count !== "number") {
-        bot.chat(`count for mineBlock must be a number`);
-        return false;
+        throw new TypeError(`count for mineBlock must be a number`);
     }
     const blockByName = mcData.blocksByName[name];
     if (!blockByName) {
-        bot.chat(`No block named ${name}`);
-        return false;
+        throw new TypeError(`No block named ${name}`);
     }
     const blocks = bot.findBlocks({
         matching: [blockByName.id],
@@ -20,8 +17,7 @@ async function mineBlockType(bot, name, count = 1) {
     });
 
     if (blocks.length === 0) {
-        bot.chat(`No ${name} nearby, please explore first`);
-        return false;
+        throw new TypeError(`No ${name} nearby, please explore first`);
     }
     console.log(blocks.length, 'blocks found')
 

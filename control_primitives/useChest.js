@@ -4,7 +4,7 @@ async function getItemFromChest(bot, chestPos, itemsToGet, count) {
     const chestPosition = new Vec3(chestPos.x, chestPos.y, chestPos.z);
     // return if chestPosition is not Vec3
     if (!(chestPosition instanceof Vec3)) {
-        bot.chat("chestPosition for getItemFromChest must be a Vec3");
+        throw new TypeError("chestPosition for getItemFromChest must be a Vec3");
     }
     await moveToChest(bot, chestPosition);
     const chestBlock = bot.blockAt(chestPosition);
@@ -35,7 +35,7 @@ async function depositItemIntoChest(bot, chestPos, itemsToDeposit, count) {
     const chestPosition = new Vec3(chestPos.x, chestPos.y, chestPos.z);
     // return if chestPosition is not Vec3
     if (!(chestPosition instanceof Vec3)) {
-        bot.chat(
+        throw new TypeError(
             "chestPosition for depositItemIntoChest must be a Vec3"
         );
         return false;
@@ -82,7 +82,7 @@ async function depositItemIntoChest(bot, chestPos, itemsToDeposit, count) {
 async function moveToChest(bot, chestPos) {
     const chestPosition = new Vec3(chestPos.x, chestPos.y, chestPos.z);
     if (!(chestPosition instanceof Vec3)) {
-        bot.chat(
+        throw new TypeError(
             "chestPosition for depositItemIntoChest must be a Vec3"
         );
         return false;

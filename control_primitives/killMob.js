@@ -1,13 +1,11 @@
 async function killMob(bot, mobName, timeout = 300) {
     // return if mobName is not string
     if (typeof mobName !== "string") {
-        bot.chat(`mobName for killMob must be a string`);
-        return false;
+        throw new TypeError(`mobName for killMob must be a string`);
     }
     // return if timeout is not number
     if (typeof timeout !== "number") {
-        bot.chat(`timeout for killMob must be a number`);
-        return false;
+        throw new TypeError(`timeout for killMob must be a number`);
     }
 
     const weaponsForShooting = [
@@ -28,8 +26,7 @@ async function killMob(bot, mobName, timeout = 300) {
             entity.position.distanceTo(bot.entity.position) < 32
     );
     if (!entity) {
-        bot.chat(`No ${mobName} nearby, please explore first`);
-        return false;
+        throw new TypeError(`No ${mobName} nearby.`);
     }
 
     let droppedItem;

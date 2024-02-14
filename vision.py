@@ -29,7 +29,7 @@ def take_screenshot(name):
         screenshot = pyautogui.screenshot(region=(window.left, window.top, window.width, window.height))
         screenshot.save(name)
 
-def visionModule(query):
+def visionModule(query, prompt='SYSTEM: You are answering questions for a Minecraft player. Based on the image provided, this is what the player wants to know:'):
     # Take screenshot
     take_screenshot('screenshot.png')
     base64_image = encode_image('screenshot.png')
@@ -41,7 +41,7 @@ def visionModule(query):
             {
                 "role": "user",
                 "content": [
-                    {"type": "text", "text": f"SYSTEM: You are answering questions for a Minecraft player. Based on the image provided, this is what the player wants to know: {query}"},
+                    {"type": "text", "text": f"{prompt} {query}"},
                     {
                         "type": "image_url",
                         "image_url": {

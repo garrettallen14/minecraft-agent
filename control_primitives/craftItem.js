@@ -1,34 +1,32 @@
 async function craftItem(bot, name, count = 1) {
     // return if name is not string
     if (typeof name !== "string") {
-        console.log("name for craftItem must be a string");
-        return false;
+        throw new TypeError("name for craftItem must be a string");
     }
     // return if count is not number
     if (typeof count !== "number") {
-        bot.chat("count for craftItem must be a number");
-        return false;
+        throw new TypeError("count for craftItem must be a number");
     }
     const itemByName = mcData.itemsByName[name];
     if (!itemByName) {
-        bot.chat(`No item named ${name}`);
-        return false;
+        throw new TypeError(`No item named ${name}`);
     }
     const craftingTable = bot.findBlock({
         matching: mcData.blocksByName.crafting_table.id,
         maxDistance: 32,
     });
-    if (!craftingTable) {
-        bot.chat("Craft without a crafting table");
-    } else {
-        await bot.pathfinder.goto(
-            new pathfinder.goals.GoalGetToBlock(craftingTable.position.x, craftingTable.position.y, craftingTable.position.z), timeout=1000000
-        );
-    }
+    // if (!craftingTable) {
+    //     bot.chat("Craft without a crafting table");
+    // } else {
+        // await bot.pathfinder.goto(
+        //     new pathfinder.goals.GoalGetToBlock(craftingTable.position.x, craftingTable.position.y, craftingTable.position.z), timeout=1000000
+        // );
+    // }
     const recipe = bot.recipesFor(itemByName.id, null, 1, craftingTable)[0];
     if (recipe) {
         bot.chat(`I can make ${name}`);
         try {
+            await bot.pathfinder.goto(new pathfinder.goals.GoalGetToBlock(craftingTable.position.x, craftingTable.position.y, craftingTable.position.z), timeout=100000);
             await bot.craft(recipe, count, craftingTable);
             bot.chat(`I did the recipe for ${name} ${count} times`);
         } catch (err) {
@@ -43,8 +41,7 @@ async function craftItem(bot, name, count = 1) {
 function failedCraftFeedback(bot, name, item, craftingTable) {
     const recipes = bot.recipesAll(item.id, null, craftingTable);
     if (!recipes.length) {
-        bot.chat(`No crafting table nearby`);
-        return false;
+        throw new TypeError(`No crafting table nearby`);
     } else {
         const recipes = bot.recipesAll(
             item.id,
@@ -99,8 +96,7 @@ function failedCraftFeedback(bot, name, item, craftingTable) {
                 }
             }
         }
-        bot.chat(`I cannot make ${name} because I need: ${message}`);
-        return false;
+        throw new TypeError(`I cannot make ${name} because I need: ${message}`);
     }
 }
 

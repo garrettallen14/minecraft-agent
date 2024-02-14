@@ -2,27 +2,23 @@ Vec3 = require('vec3').Vec3;
 
 async function placeItem(bot, name, target) {
 
-    position = new Vec3(target.position.x, target.position.y, target.position.z);
+    position = new Vec3(target.x, target.y, target.z);
     
     // return if name is not string
     if (typeof name !== "string") {
-        bot.chat(`name for placeItem must be a string`);
-        return false;
+        throw new TypeError(`name for placeItem must be a string`);
     }
     // return if position is not Vec3
     if (!(position instanceof Vec3)) {
-        bot.chat(`position for placeItem must be a Vec3`);
-        return false;
+        throw new TypeError(`position for placeItem must be a Vec3`);
     }
     const itemByName = mcData.itemsByName[name];
     if (!itemByName) {
-        bot.chat(`No item named ${name}`);
-        return false;
+        throw new TypeError(`No item named ${name}`);
     }
     const item = bot.inventory.findInventoryItem(itemByName.id);
     if (!item) {
-        bot.chat(`No ${name} in inventory`);
-        return false;
+        throw new TypeError(`No ${name} in inventory`);
     }
     const item_count = item.count;
     // find a reference block
@@ -46,16 +42,9 @@ async function placeItem(bot, name, target) {
         }
     }
     if (!referenceBlock) {
-        bot.chat(
+        throw new TypeError(
             `No block to place ${name} on. You cannot place a floating block.`
         );
-        // _placeItemFailCount++;
-        // if (_placeItemFailCount > 10) {
-        //     throw new Error(
-        //         `placeItem failed too many times. You cannot place a floating block.`
-        //     );
-        // }
-        return;
     }
 
     // You must use try catch to placeBlock
@@ -67,6 +56,12 @@ async function placeItem(bot, name, target) {
         await bot.equip(item, "hand");
         await bot.placeBlock(referenceBlock, faceVector);
         bot.setControlState('sneak', false) // UnSneak
+        
+        // Check to ensure the item was placed
+        if (bot.blockAt(referenceBlock.position.plus(faceVector)).name !== name) {
+            throw new Error(`Failed to place block ${name}. Perhaps try placing it in a better location.`);
+        }
+
         bot.chat(`Placed ${name}`);
     } catch (err) {
         const item = bot.inventory.findInventoryItem(itemByName.id);

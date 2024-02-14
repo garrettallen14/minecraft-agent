@@ -1,5 +1,5 @@
 import chromadb
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta

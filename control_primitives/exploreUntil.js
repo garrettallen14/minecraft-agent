@@ -8,12 +8,10 @@ async function exploreUntil(
     }
 ) {
     if (typeof maxTime !== "number") {
-        bot.chat("maxTime must be a number");
-        return false;
+        throw new TypeError("maxTime must be a number");
     }
     if (typeof callback !== "function") {
-        bot.chat("callback must be a function");
-        return false;
+        throw new TypeError("callback must be a function");
     }
     const test = callback();
     if (test) {
@@ -21,8 +19,7 @@ async function exploreUntil(
         return Promise.resolve(test);
     }
     if (direction.x === 0 && direction.y === 0 && direction.z === 0) {
-        bot.chat("direction cannot be 0, 0, 0");
-        return false;
+        throw new TypeError("direction cannot be 0, 0, 0");
     }
     if (
         !(
