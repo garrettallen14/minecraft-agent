@@ -85,14 +85,40 @@ class Module:
 
 
     def findBlockType(self, bot, name, maxDistance=32):
-        block = bot.findBlock({
+        blocks = bot.findBlock({
             'matching': mcData.blocksByName[name].id,
-            'maxDistance': maxDistance
+            'maxDistance': maxDistance,
+            'count': 5
         })
-        
-        return block
+
+        for block in blocks:
+            if bot.canSeeBlock(bot.blockAt(block)):
+                return block
+            
     
     def askLLM(self, question):
         return self.llms['ask'].invoke({
             'question': question
         }).content
+    
+    def scanEnvironment(self, bot, query):
+
+        prompt = """You are to scan the Minecraft screenshot to find the following Query stated below.
+If you find the Query you are looking for, reply: YES, and explain what you see, and how it satisfies the Query you are seeking.
+If you do not find the Query you are looking for, reply: NO, but provide information which may be useful given what you see.
+Query: """
+        
+        # North, East, South, West
+        responses = []
+        for pitch, direction_name in zip([180, 270, 0, 90], ['North', 'East', 'South', 'West']):
+            # Look in the direction
+            bot.look(pitch, 0)
+            # Get information from the Vision Module
+            response = vision.visionModule(prompt=prompt, query=query)
+
+            if 'YES' in response:
+                return f'{query} was found in the {direction_name}! \nResponse from the vision module: {response}'
+            else:
+                responses.append(f'{query} was not found in the {direction_name} direction. \nResponse from the vision module: {response}')
+
+        return responses

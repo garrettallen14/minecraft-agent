@@ -49,12 +49,12 @@ class Module:
     def perform_action(self, bot, goal):
 
         # Generate a question to ask the perception module, so we can gather some useful information about the environment
-        perception_query = self.llms['generate_perception_query'].invoke({
-            'goal': goal,
-            'current_environment': env_info.getPromptInfo(bot),
-            'previous_action_outcomes': self.previous_action_outcomes,
-            'current_goal_progress': self.current_goal_progress
-        }).content
+        # perception_query = self.llms['generate_perception_query'].invoke({
+        #     'goal': goal,
+        #     'current_environment': env_info.getPromptInfo(bot),
+        #     'previous_action_outcomes': self.previous_action_outcomes,
+        #     'current_goal_progress': self.current_goal_progress
+        # }).content
 
         # prompt_input = {
         #     'goal': goal,
@@ -65,13 +65,14 @@ class Module:
         # prompt = self.specific_prompts['generate_perception_query'].format(**prompt_input)
         # perception_query = vision.visionModule(query='', prompt=prompt)
 
-        perception_query = findAndParseJsonLikeText(perception_query)[0]['question']
+        # perception_query = findAndParseJsonLikeText(perception_query)[0]['question']
 
-        print(f'{perception_query=}')
+        # print(f'{perception_query=}')
 
         # Ask the perception module the question, and get the answer. Should enlighten us about the environment
-        answer = self.percept.perceive(bot, perception_query)
-        
+        # answer = self.percept.perceive(bot, perception_query)
+        perception_query = ''
+        answer = ''
         start_time = time.time()
         failed_action_proposal = []
         while time.time() - start_time < 120:
@@ -142,7 +143,7 @@ class Module:
                 
                 break
             except Exception as e:
-                failed_action_proposal.append([f'Failed attempt number {len(failed_action_proposal)}:', 'Failed action proposal:', self.next_best_action, 'Reason:', str(e)[:300]])
+                failed_action_proposal.append([f'Failed attempt number {len(failed_action_proposal) + 1}:', 'Failed action proposal:', self.next_best_action, 'Reason:', str(e)[:300]])
                 print(f'{failed_action_proposal=}')
                 continue
 
@@ -211,3 +212,21 @@ class Module:
             print(f'{item_variable} was successfully placed at {block.position}!')
         else:
             raise Exception(f'{item_variable} was not successfully placed!')
+        
+
+    # After a goal is completed or determined to be finished, we need to gather key insights from the bot's actions and the environment
+    def save_key_lessons(self, goal):
+
+        # Get key lessons from the bot's actions and the environment
+        key_lessons = self.llms['key_lessons'].invoke({
+            'goal': goal,
+            'previous_action_outcomes': self.previous_action_outcomes,
+            'previous_goal_progress': self.current_goal_progress
+        }).content
+
+        # Store the key lessons in the memory module
+        self.mem.store_memory(key_lessons, 'goal_lessons')
+
+        self.reset_actions()
+
+        return key_lessons

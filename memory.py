@@ -18,7 +18,7 @@ class Module:
         # self.collections['collection'] allows us to dynamically write and read to different collections 
         self.database = chromadb.PersistentClient(path_to_database)
         self.collections = {
-            'goal_lessons_learned': self.database.get_or_create_collection('goal_lessons'),
+            'goal_lessons': self.database.get_or_create_collection('goal_lessons'),
             'general_perceptions': self.database.get_or_create_collection('general_perceptions'),
             'important_locations': self.database.get_or_create_collection('important_locations'),
             'core_memories': self.database.get_or_create_collection('core_memories')

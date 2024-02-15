@@ -26,10 +26,13 @@ async function craftItem(bot, name, count = 1) {
     if (recipe) {
         bot.chat(`I can make ${name}`);
         try {
-            await bot.pathfinder.goto(new pathfinder.goals.GoalGetToBlock(craftingTable.position.x, craftingTable.position.y, craftingTable.position.z), timeout=100000);
+            if (craftingTable) {
+                await bot.pathfinder.goto(new pathfinder.goals.GoalGetToBlock(craftingTable.position.x, craftingTable.position.y, craftingTable.position.z), timeout=60000);
+            }
             await bot.craft(recipe, count, craftingTable);
             bot.chat(`I did the recipe for ${name} ${count} times`);
         } catch (err) {
+            console.log(err);
             bot.chat(`I cannot do the recipe for ${name} ${count} times`);
         }
     } else {

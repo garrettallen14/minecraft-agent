@@ -37,8 +37,8 @@ Here is what you discovered:
 Question: {question}
 Answer: {answer}
 
-Ignore this below if both the Proposed Action and Rejection Information are empty:
-You may have also recently proposed an action to the bot, and the bot may have rejected it. Here is the information about the proposed action:
+You may have proposed an action to the bot in the previous step.
+If the Rejected Proposal Actions field is filled, you must explain in detail exactly why the proposed action was rejected and what the bot should do instead.
 Rejected Proposed Actions: {proposed_action}
 
 Utilize all of this information to decide your next best action to complete your Goal.
@@ -102,9 +102,8 @@ Tasks: Utilize this information to:
     2. Take the Previous Goal Progress and update it with this information to form the New Goal Progress.
 Complete both Tasks in a single JSON formatted response.
 The response should have the following structure:
-    "reasoning": "detailed and thought through reasoning for your summary of changes in the environment and updated goal progress",
-    "environment_changes": "explain how the action contributed to environment changes. If no changes occured, explain why you think the function failed to do what it was supposed to.",
-    "new_goal_progress": "updated goal progress based on the environment changes"
+    "environment_changes": "detailed and thought out critical response explaining what you thought the action would accomplish, then analyzing whether or not the action accomplished the task in the way you would have liked.",
+    "new_goal_progress": "detailed and explanatory updated goal progress, which reflects the progress made after the action was performed, and what is left to be done to achieve the goal."
 
 The bot will use the environment_changes value to see what effects on the inventory or environment he has had to determine the true outcome of his action. The new_goal_progress value will be used to update the goal progress based on the environment changes.
 Note: In your reasoning, explore if environment_changes seem unchanged. If so, decide if the function simply failed to do what it was supposed to. If the function failed to have the effect it was supposed to, then in the environment_changes, explain why you think the function failed to do what it was supposed to do, so we can avoid this mistake in the future.
@@ -113,7 +112,7 @@ JSON Formatted Response:"""
 
     gather_new_memories = """As a Minecraft helper bot, your primary function is to discern and preserve essential information. Below you'll find data comprising actions performed, changes in the environment, and progress toward new goals. Your task is to evaluate this information carefully and decide if any of it is critical enough to be memorized. You have access to two specialized database collections for storing this information:
 
-important_locations: This collection is designated for information on significant places discovered within the game, such as "The location of the mesa village is at Vec3(x, y, z)." Only truly noteworthy locations should be added to this collection to avoid clutter and maintain its value.
+important_locations: This collection is designated for information on significant places discovered within the game, such as "The location of the mesa village is at Vec3(x, y, z)." Only truly noteworthy locations should be added to this collection to avoid clutter and maintain its value. Locations of crafting tables and chests are particularly important.
 
 core_memories: This collection is reserved for absolutely critical information, foundational to the bot's operations and understanding. Examples include "My name is XYZ.", or "Today is Steve's birthday!" Commit to this collection sparingly; only information that is pivotal and must never be forgotten should be included.
 
@@ -136,8 +135,22 @@ Remember: Reserve the core_memories collection for information that is fundament
 # Only remember truly critical information. Your response will be directly executed upon submission, so you must ensure proper syntax and accuracy.
 JSON Formatted Response:"""
 
+    key_lessons = """The Minecraft Bot has finished trying to accomplish a goal.
+Your task is to look at how the Bot attempted to accomplish the goal at every single timestep and determine what key lessons were learned from the bot's actions and the environment.
+These lessons will inform future planning and strategies for the bot to accomplish its goals.
+Be critical and thoughtful in your analysis, and ensure that the lessons are actionable and can be used to improve the bot's future performance.
+Goal: {goal}
+Previous Goal Progress: {previous_goal_progress}
+Previous Action / Outcomes: {previous_action_outcomes}
+RESPOND IN JSON FORMAT:
+    "reasoning": "detailed and thought through reasoning for your key lessons learned",
+    "key_lessons": "key lessons learned from the bot's actions and the environment"
 
-    return {'generate_perception_query': generate_perception_query, 'generate_next_best_action': generate_next_best_action, 'gate_action': gate_action, 'summarize_environment_changes': summarize_environment_changes, 'gather_new_memories': gather_new_memories}
+Respond here in the JSON format, using "reasoning" then "key_lessons" as your keys.
+JSON Formatted Response:"""
+
+
+    return {'generate_perception_query': generate_perception_query, 'generate_next_best_action': generate_next_best_action, 'gate_action': gate_action, 'summarize_environment_changes': summarize_environment_changes, 'gather_new_memories': gather_new_memories, 'key_lessons': key_lessons}
 
 
 
@@ -153,7 +166,7 @@ def get_llms(query=''):
 
         for key, value in prompts.items():
             # save money by using gpt-3.5-turbo-1106
-            if key == 'generate_next_best_action':
+            if key == 'generate_next_best_action' or key == 'key_lessons':
                 prompts[key] = ChatPromptTemplate.from_template(value) | llm_4
             else:
                 prompts[key] = ChatPromptTemplate.from_template(value) | llm

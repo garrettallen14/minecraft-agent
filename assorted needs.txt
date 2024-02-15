@@ -22,3 +22,6 @@ Need to figure out how to reset the bot when it is glitching.
 Decide on the memory module how to best do memory decay
 
 Reconfigure the perception module, decide if we really need a bunch of stuff for it
+
+
+Provide the Agent with a list of previous goals attempted and quick summary of outcomes.
