@@ -28,19 +28,16 @@ Note: The key for "exact syntax of the module name" must be in the exact syntax 
 ******************
 Example:
     "reasoning": "...",
-    "update_goal": "description of the proposed new goal you are inputting to the update_goal module"
+    "update_goal": "description of the proposed new goal you are inputting to the update_goal module. keep goals reasonable and easily achievable"
 Example:
     "reasoning": "...",
     "ask_memories": "the exact question you are inputting to the ask_memories module"
 Example:
     "reasoning": "...",
     "perform_action": "a description of the simple action you would like perform_action module to perform"
-Example:
-    "reasoning": "...",
-    "perceive": "the task you are giving to the perceive module to better understand the current environment"
 ******************
 
-# Note, if you ever notice you have gotten into a rut, you can always simply update the goal to begin something new. This often helps to think things through from a different perspective.
+# Configuration: When stuck in a loop, the Agent will opt for the "update_goal" module to change the goal. This will allow the Agent to break out of the loop and continue with the game.
 JSON Formatted Response:"""
 
 

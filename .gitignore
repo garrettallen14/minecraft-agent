@@ -2,3 +2,7 @@
 mineflayer_vision.json
 
 __pycache__
+
+venv
+
+memory_store\

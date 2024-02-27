@@ -1,17 +1,3 @@
-action:
-    When craftItem, we need to check that we have everything we need to actually craft this item!
-        - somehow, we need to throw an error here, and pass it back into the action module
-    DONE:When doing the full choosing action function, need to give it GPT 4 vision!
-
-findBlockType:
-    Need to ensure that the bot can actually see this block.
-    The bot will often find blocks which are not truly visible...
-
-exploreUntil is not working in the perception module
-
-
-Commit changes to the mcData github package...
-
 
 Need to figure out how to reset the bot when it is glitching.
     1. need a way to determine when it is glitching

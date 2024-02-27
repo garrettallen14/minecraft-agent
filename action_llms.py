@@ -32,11 +32,6 @@ Current Environment: {current_environment}
 Previous Action / Outcomes: {previous_action_outcomes}
 Current Goal Progress: {current_goal_progress}
 
-In the previous step, you have used the Perception Module to gather additional information to help you decide your next best action to complete your Goal.
-Here is what you discovered:
-Question: {question}
-Answer: {answer}
-
 You may have proposed an action to the bot in the previous step.
 If the Rejected Proposal Actions field is filled, you must explain in detail exactly why the proposed action was rejected and what the bot should do instead.
 Rejected Proposed Actions: {proposed_action}
@@ -89,26 +84,31 @@ Here's a template for how your response should look, adjusted for a scenario whe
 
 This template ensures the bot takes logical, efficient steps towards its goals without repeating ineffective actions or bypassing essential preparatory stages."""
 
-    summarize_environment_changes = """As a Minecraft helper bot, your task is to use the information below to summarize the changes in the environment after you performed a given action.
+    summarize_environment_changes = """As a Minecraft assistant, your task is to analyze the impact of a specific action towards achieving your goal. Provide a summary of the action's outcome and update the goal progress based on this impact.
+
+Input details:
+- Goal: The objective you're aiming to achieve.
+- Previous Goal Progress: The progress made towards the goal before this action.
+- Action: The action you've taken to advance towards the goal.
+- Previous Environment: The state of the environment before the action.
+- Current Environment: The state of the environment after the action.
+
 Goal: {goal}
 Previous Goal Progress: {previous_goal_progress}
+Action: {action}
+Previous Environment: {previous_environment}
+Current Environment: {current_environment}
 
-In pursuit of your Goal, you have performed the following action: {action}
-The previous environment was: {previous_environment}
-The current environment is: {current_environment}
+Output Requirements:
+1. Summarize the outcome of the action, assessing its impact on reaching the goal and identifying any shortcomings in achieving the desired results.
+2. Update the goal progress, incorporating the impact of the action.
 
-Tasks: Utilize this information to:
-    1. Summarize the changes in the environment after you performed the given action, with respect to your Goal.
-    2. Take the Previous Goal Progress and update it with this information to form the New Goal Progress.
-Complete both Tasks in a single JSON formatted response.
-The response should have the following structure:
-    "environment_changes": "detailed and thought out critical response explaining what you thought the action would accomplish, then analyzing whether or not the action accomplished the task in the way you would have liked.",
-    "new_goal_progress": "detailed and explanatory updated goal progress, which reflects the progress made after the action was performed, and what is left to be done to achieve the goal."
+Provide your analysis in a JSON format with two keys: "action_outcome" and "new_goal_progress", each containing concise, detailed explanations. Limit your total response to 200 tokens.
 
-The bot will use the environment_changes value to see what effects on the inventory or environment he has had to determine the true outcome of his action. The new_goal_progress value will be used to update the goal progress based on the environment changes.
-Note: In your reasoning, explore if environment_changes seem unchanged. If so, decide if the function simply failed to do what it was supposed to. If the function failed to have the effect it was supposed to, then in the environment_changes, explain why you think the function failed to do what it was supposed to do, so we can avoid this mistake in the future.
-
-JSON Formatted Response:"""
+Example JSON Response Structure:
+  "action_outcome": "Explanation of the action's effectiveness and any areas where it fell short.",
+  "new_goal_progress": "Updated progress towards the goal, including next steps."
+"""
 
     gather_new_memories = """As a Minecraft helper bot, your primary function is to discern and preserve essential information. Below you'll find data comprising actions performed, changes in the environment, and progress toward new goals. Your task is to evaluate this information carefully and decide if any of it is critical enough to be memorized. You have access to two specialized database collections for storing this information:
 

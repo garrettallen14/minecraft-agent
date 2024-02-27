@@ -1,3 +1,4 @@
+import os
 import action_llms
 import env_info
 import json
@@ -41,104 +42,66 @@ class Module:
         self.bot_functions = json.loads(open('bot_functions.json').read())
         self.specific_prompts = action_llms.get_prompts()
         self.next_best_action = ''
+        self.action_outcome_file = './action_outcomes.txt'
 
     def reset_actions(self):
         self.previous_action_outcomes = []
         self.current_goal_progress = ''
 
+
+    def store_action_outcome(self, action_record):
+        # Append the action record string to the file
+        with open(self.action_outcome_file, 'a') as file:
+            file.write(str(action_record))
+        return
+
     def perform_action(self, bot, goal):
 
-        # Generate a question to ask the perception module, so we can gather some useful information about the environment
-        # perception_query = self.llms['generate_perception_query'].invoke({
-        #     'goal': goal,
-        #     'current_environment': env_info.getPromptInfo(bot),
-        #     'previous_action_outcomes': self.previous_action_outcomes,
-        #     'current_goal_progress': self.current_goal_progress
-        # }).content
-
-        # prompt_input = {
-        #     'goal': goal,
-        #     'current_environment': env_info.getPromptInfo(bot),
-        #     'previous_action_outcomes': self.previous_action_outcomes,
-        #     'current_goal_progress': self.current_goal_progress,
-        # }
-        # prompt = self.specific_prompts['generate_perception_query'].format(**prompt_input)
-        # perception_query = vision.visionModule(query='', prompt=prompt)
-
-        # perception_query = findAndParseJsonLikeText(perception_query)[0]['question']
-
-        # print(f'{perception_query=}')
-
-        # Ask the perception module the question, and get the answer. Should enlighten us about the environment
-        # answer = self.percept.perceive(bot, perception_query)
-        perception_query = ''
-        answer = ''
         start_time = time.time()
         failed_action_proposal = []
         while time.time() - start_time < 120:
             try:
-                # Generate the next best action to take, given the current environment and the goal
-                # new_action = self.llms['generate_next_best_action'].invoke({
-                #     'goal': goal,
-                #     'current_environment': env_info.getPromptInfo(bot),
-                #     'previous_action_outcomes': self.previous_action_outcomes,
-                #     'current_goal_progress': self.current_goal_progress,
-                #     'question': perception_query,
-                #     'answer': answer,
-                #     'proposed_action': failed_action_proposal,
-                #     'additional_information': additional_info,
-                #     'bot_functions': self.bot_functions
-                # }).content
-                
+                # Store the action outcome record for future training
+                action_record = {}
+
                 # Use GPT-4 Vision model to generate the next best action. This will provide additional grounding for the Agent within the environment
                 prompt_input = {
                     'goal': goal,
                     'current_environment': env_info.getPromptInfo(bot),
                     'previous_action_outcomes': self.previous_action_outcomes,
                     'current_goal_progress': self.current_goal_progress,
-                    'question': perception_query,
-                    'answer': answer,
                     'proposed_action': failed_action_proposal,
                     'bot_functions': self.bot_functions
-                
                 }
                 prompt = self.specific_prompts['generate_next_best_action'].format(**prompt_input)
                 new_action = vision.visionModule(query='', prompt=prompt)
-
-                print(f'{new_action=}')
-
+                
                 self.next_best_action = findAndParseJsonLikeText(new_action)[0]['next_best_action']
+                reasoning = findAndParseJsonLikeText(new_action)[0]['reasoning']
 
                 print(f'{new_action=}')
-
-                # Ensure this action is proper syntax, makes legitimate sense for our situation, is not a duplicate of the last action or a duplicate of the last 3 actions
-                gate = self.llms['gate_action'].invoke({
-                    'goal': goal,
-                    'current_environment': env_info.getPromptInfo(bot),
-                    'previous_action_outcomes': self.previous_action_outcomes,
-                    'current_goal_progress': self.current_goal_progress,
-                    'next_best_action': new_action
-                }).content
-
-                gate = findAndParseJsonLikeText(gate)[0]['gate']
-
-                print(f'{gate=}')
-
-                if 'false' in gate.lower():
-                    raise Exception(f"Gate check failed: {gate['description']}")
 
                 # Get before
                 previous_environment = env_info.getPromptInfo(bot)
+
+                # Store our environment before, plus reasoning and action
+                action_record['previous_environment'] = previous_environment
+                action_record['reasoning'] = reasoning
+                action_record['proposed action'] = self.next_best_action
 
                 # Execute action
                 try:
                     # If the action is placing an Item, we need a special function to ensure that the bot has successfully placed it afterwards
                     if 'placeItem' in self.next_best_action:
                         self.execute_place_item(bot, self.next_best_action)
-                        
                     else:
                         exec(self.next_best_action)
+
                 except Exception as e:
+                    # Store the action outcome record for future training
+                    action_record['outcome'] = str(e)
+                    self.store_action_outcome(action_record)
+
                     raise Exception(str(e))
                 
                 break
@@ -147,20 +110,23 @@ class Module:
                 print(f'{failed_action_proposal=}')
                 continue
 
-        changes_json = self.llms['summarize_environment_changes'].invoke({
+        # Use GPT-4V to analyze changes
+        prompt_input = {
             'goal': goal,
             'action': self.next_best_action,
             'previous_environment': previous_environment,
             'current_environment': env_info.getPromptInfo(bot),
             'previous_goal_progress': self.current_goal_progress
-        }).content
+        }
+        prompt = self.specific_prompts['summarize_environment_changes'].format(**prompt_input)
+        changes_json = vision.visionModule(query='', prompt=prompt)
 
         changes = findAndParseJsonLikeText(changes_json)[0]
 
         print(f'{changes=}')
 
         self.current_goal_progress = changes['new_goal_progress']
-        self.environment_changes = changes['environment_changes']
+        self.environment_changes = changes['action_outcome']
         self.previous_action_outcomes.append([f'Action Number {len(self.previous_action_outcomes)}', new_action, 'Outcome:', self.environment_changes])
 
         # Try to gather any new memories
@@ -170,6 +136,10 @@ class Module:
             'environment_changes': self.environment_changes,
             'new_goal_progress': self.current_goal_progress
         }).content
+
+        # Store the action outcome record for future training
+        action_record['outcome'] = self.environment_changes
+        self.store_action_outcome(action_record)
 
         print(f'{new_memories=}')
 
